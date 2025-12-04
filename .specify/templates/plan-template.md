@@ -31,7 +31,10 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+- **[ ] Principle I (Dynamic Resource Management):** Does the plan account for discovering resources at runtime?
+- **[ ] Principle II (On-the-Fly Content Generation):** Does the plan avoid assumptions of static, pre-built content?
+- **[ ] Principle III (Persistent State Tracking):** Does the data model support logging all required system and student activities?
+- **[ ] Principle IV (A*-Focused Workflow):** Does the technical design directly enable the Assign -> Test -> Diagnose -> Remediate -> Model loop?
 
 ## Project Structure
 
