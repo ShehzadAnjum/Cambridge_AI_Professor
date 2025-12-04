@@ -85,6 +85,7 @@ class ExamAttempt(Base):
     mock_exam_id = Column(Integer, ForeignKey("mock_exams.id"))
     score = Column(Float)
     submitted_at = Column(DateTime(timezone=True), server_default=func.now())
+    attempted_questions = relationship("AttemptedQuestion", backref="exam_attempt")
 
 class AttemptedQuestion(Base):
     """Represents a student's answer to a single question in an exam attempt."""
@@ -94,3 +95,4 @@ class AttemptedQuestion(Base):
     question_id = Column(Integer, ForeignKey("questions.id"))
     score = Column(Float)
     diagnosed_weakness = Column(String)
+    question = relationship("Question")
