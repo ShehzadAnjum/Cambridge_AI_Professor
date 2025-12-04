@@ -4,8 +4,9 @@ from typing import List, Optional, Tuple
 from pathlib import Path
 import re
 from sqlalchemy.orm import Session
-from src.core_database import crud
+from src.core_database import crud, models
 from src.dynamic_resource_manager.metadata_extractor import MetadataExtractor
+from src.content_generation_engine.pdf_qa_extractor import PDFQuestionExtractor
 
 BASE_URLS = {
     "Accounting_9706": "https://www.savemyexams.com/a-level/accounting/cie/9706/past-papers/",
@@ -98,6 +99,7 @@ def scrape_and_download(
     
     links = get_all_download_links(base_url)
     metadata_extractor = MetadataExtractor()
+    pdf_qa_extractor = PDFQuestionExtractor()
 
     for link in links:
         filename = Path(link).name
@@ -128,8 +130,22 @@ def scrape_and_download(
                     "type": metadata["type"],
                     "path": str(save_path.resolve()),
                 }
-                crud.create_resource(db, resource_data)
+                new_resource = crud.create_resource(db, resource_data)
                 print(f"Successfully downloaded and added to DB: {filename}")
+
+                # If the downloaded file is a question paper, extract questions
+                if new_resource.type == "Past Paper":
+                    print(f"Extracting questions from {filename}...")
+                    questions = pdf_qa_extractor.extract_questions_from_pdf(save_path)
+                    for q_data in questions:
+                        question = models.Question(
+                            resource_id=new_resource.id,
+                            question_number=q_data["question_number"],
+                            max_marks=q_data["max_marks"],
+                        )
+                        db.add(question)
+                    db.commit()
+                    print(f"Extracted and stored {len(questions)} questions from {filename}")
             else:
                 print(f"Failed to download {filename}")
         else:
